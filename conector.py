@@ -44,7 +44,7 @@ def print_last_change(table_name):
                 last_entry = last_data.get(table_name)
                 if last_entry is None or result['id'] != last_entry['id'] or result['date_modified'] != last_entry['date_modified']:
 
-                    # Certifique-se de inicializar data_db[table_name] apenas se ainda não estiver definido
+                    #  Busca as PrimaryKey se a chave com o nome da tabela não for encontrada no dicionario.
                     if table_name not in data_db:
                         data_db[table_name] = obter_ids_da_tabela(table_name)
 
