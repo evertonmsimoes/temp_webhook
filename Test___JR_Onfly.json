@@ -1,0 +1,803 @@
+{
+  "name": "Test - JR Onfly",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "eacb8f4d-fff8-491f-bdc7-a684219953da",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        320,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.vat }}",
+              "value2": "={{ $('Validation').all()[0].json.body.id }}"
+            }
+          ]
+        }
+      },
+      "id": "40edba46-55b8-4a8a-9bc1-e6ec05f272e5",
+      "name": "IF2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        560,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "aaef0ef4-c33c-4392-9d2e-81cb399025d7",
+        "options": {}
+      },
+      "id": "5709b445-41d6-420c-8862-d2dcbd4613f9",
+      "name": "Webhook - SuiteCRM",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        -40
+      ],
+      "webhookId": "aaef0ef4-c33c-4392-9d2e-81cb399025d7"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "contactId": "={{ $json.id }}",
+        "updateFields": {
+          "email": "={{ $('Webhook - SuiteCRM').all()[0].json.body.email }}",
+          "function": "={{ $('Webhook - SuiteCRM').all()[0].json.body.department }}",
+          "name": "={{ $('Webhook - SuiteCRM').all()[0].json.body.first_name }} {{ $('Webhook - SuiteCRM').all()[0].json.body.last_name }}",
+          "vat": "={{ $('Webhook - SuiteCRM').all()[0].json.body.id }}"
+        }
+      },
+      "id": "723042d8-c4fe-47b1-ae64-bbb4653ecd2f",
+      "name": "Update Contact",
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        940,
+        60
+      ],
+      "credentials": {
+        "odooApi": {
+          "id": "MtSiw1OXGswAjbyi",
+          "name": "Key_user_automation"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contactName": "={{ $json.body.first_name }} {{ $json.body.last_name }}",
+        "additionalFields": {
+          "email": "={{ $json.body.email }}",
+          "function": "={{ $json.body.department }}",
+          "mobile": "={{ $json.body.phone_mobile }}",
+          "vat": "={{ $json.body.id }}"
+        }
+      },
+      "id": "d1be44d9-7e28-49d5-bea4-5b0d2dc8f0d0",
+      "name": "Create Contact",
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        -260
+      ],
+      "credentials": {
+        "odooApi": {
+          "id": "aetg3afqEtLcjRM5",
+          "name": "Key_Admin"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "evertons.una@gmail.com",
+        "toEmail": "evertonmsf@hotmail.com",
+        "subject": "Atualização de Cadastro",
+        "emailFormat": "text",
+        "text": "=Cara equipe de Marketing,\n\nGostaríamos de informar que a sua informação de usuário foi atualizada com sucesso em nossos sistemas de ERP e CRM.\n\nDetalhes da Atualização:\n- Nome: {{ $('Webhook - SuiteCRM').all()[0].json.body.first_name }} {{ $('Webhook - SuiteCRM').all()[0].json.body.last_name }}\n- Departamento: {{ $('Webhook - SuiteCRM').all()[0].json.body.department }}\n- E-mail: {{ $('Webhook - SuiteCRM').all()[0].json.body.email }}\n- Número de Contato: {{ $('Webhook - SuiteCRM').all()[0].json.body.phone_mobile }}\n\nAgradecemos por manter suas informações atualizadas. Se você tiver alguma dúvida ou precisar de assistência adicional, não hesite em entrar em contato conosco.\n\nAtenciosamente,\nEquipe de Automação Onfly :D",
+        "options": {}
+      },
+      "id": "377f546e-fd97-4cf0-ae8e-eac22d59b42f",
+      "name": "Send Email Update",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1040,
+        -260
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "3VC7aAdsLthXcnF1",
+          "name": "Key_G-mail_UNA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.headers.operation }}",
+              "value2": "Insert"
+            },
+            {
+              "value1": "={{ $json.headers['x-table-name'] }}",
+              "value2": "contacts"
+            }
+          ]
+        }
+      },
+      "id": "4016c98e-d8ec-4295-ba9f-9c8ce79a8080",
+      "name": "Action Test",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -660,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.headers['x-table-name'] }}",
+              "value2": "contacts"
+            }
+          ]
+        }
+      },
+      "id": "a841f146-a349-463a-928d-9ab45c99d870",
+      "name": "Validation",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -340,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $('Webhook - SuiteCRM').all()[0].json.headers.operation }}",
+              "value2": "=Insert"
+            }
+          ]
+        }
+      },
+      "id": "23d0b74b-cc4a-4b72-b8af-9f17916a5723",
+      "name": "Validation Mail",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -540
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "custom",
+        "customResource": "mailing.contact",
+        "fieldsToCreateOrUpdate": {
+          "fields": [
+            {
+              "fieldName": "name",
+              "fieldValue": "={{ $('Webhook - SuiteCRM').all()[0].json.body.first_name }} {{ $('Webhook - SuiteCRM').all()[0].json.body.last_name }}"
+            },
+            {
+              "fieldName": "email",
+              "fieldValue": "={{ $('Webhook - SuiteCRM').all()[0].json.body.email }}"
+            }
+          ]
+        }
+      },
+      "id": "30c97d6c-cd16-4741-a078-7b6511b6970d",
+      "name": "Create Contact in M Mkt",
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        520,
+        -920
+      ],
+      "credentials": {
+        "odooApi": {
+          "id": "MtSiw1OXGswAjbyi",
+          "name": "Key_user_automation"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {
+          "fieldsList": [
+            "vat"
+          ]
+        }
+      },
+      "id": "6ad01b0b-c44e-422a-9d9b-aaa6d9e4aca7",
+      "name": "Get Info Table Contatc",
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        20,
+        -40
+      ],
+      "credentials": {
+        "odooApi": {
+          "id": "aetg3afqEtLcjRM5",
+          "name": "Key_Admin"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "evertons.una@gmail.com",
+        "toEmail": "evertonmsf@hotmail.com",
+        "subject": "Novo Contato Captado ",
+        "emailFormat": "text",
+        "text": "=Cara equipe de Marketing,\n\nGostaríamos de informar que a adição de um novo contato em nossos sistemas de ERP e CRM.\n\nDetalhes da Atualização:\n- Nome: {{ $('Webhook - SuiteCRM').all()[0].json.body.first_name }} {{ $('Webhook - SuiteCRM').all()[0].json.body.last_name }}\n- Departamento: {{ $('Webhook - SuiteCRM').all()[0].json.body.department }}\n- E-mail: {{ $('Webhook - SuiteCRM').all()[0].json.body.email }}\n- Número de Contato: {{ $('Webhook - SuiteCRM').all()[0].json.body.phone_mobile }}\n\nAgradecemos por manter suas informações atualizadas. Se você tiver alguma dúvida ou precisar de assistência adicional, não hesite em entrar em contato conosco.\n\nAtenciosamente,\nEquipe de Automação :D",
+        "options": {}
+      },
+      "id": "dcba6ec8-7273-4395-95f8-f02ddf97e2a2",
+      "name": "Send Email MKT",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        180,
+        -460
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "3VC7aAdsLthXcnF1",
+          "name": "Key_G-mail_UNA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "evertons.una@gmail.com",
+        "toEmail": "={{ $('Webhook - SuiteCRM').all()[0].json.body.email }}",
+        "subject": "Conheça AutRob - Sua Solução em Automação",
+        "emailFormat": "text",
+        "text": "=Olá {{ $('Webhook - SuiteCRM').all()[0].json.body.first_name }} {{ $('Webhook - SuiteCRM').all()[0].json.body.last_name }},\n\nGostaríamos de aproveitar a oportunidade para apresentar a AutRob, sua parceira em automação.\n\nQuem Somos:\nSomos uma equipe apaixonada por simplificar processos e impulsionar eficiência. Na [Nome da Empresa], oferecemos soluções de automação personalizadas para ajudar sua empresa a atingir novos patamares de produtividade.\n\nO que nos diferencia:\n\n- Personalização: Desenvolvemos soluções sob medida para atender às necessidades exclusivas de sua empresa.\n- Inovação: Mantemo-nos atualizados com as últimas tendências em automação para oferecer tecnologia de ponta.\n- Suporte Excepcional: Nossa equipe está sempre pronta para ajudar a garantir que você obtenha o máximo de nossas soluções.\n\nBoas-vindas!\nEstamos animados para iniciar essa jornada de automação junto com você. Se precisar de mais informações ou tiver alguma dúvida, não hesite em entrar em contato.\n\nAgradecemos pela confiança e estamos ansiosos para colaborar.\n\nAtenciosamente,\nEquipe Comercial AutRob.\n",
+        "options": {}
+      },
+      "id": "7d886c8a-43cd-403f-9a8d-3920877cdc20",
+      "name": "Send Email Presentation",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        180,
+        -160
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "3VC7aAdsLthXcnF1",
+          "name": "Key_G-mail_UNA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "custom",
+        "customResource": "mailing.contact",
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {}
+      },
+      "id": "4121f76b-d9ff-48eb-8bee-f80dc35a0ddc",
+      "name": "Create Contact in M Mkt1",
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        520,
+        -640
+      ],
+      "credentials": {
+        "odooApi": {
+          "id": "MtSiw1OXGswAjbyi",
+          "name": "Key_user_automation"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "270418f5-58da-4fc6-b4e7-696c05186eeb",
+      "name": "Loop Over Items1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        860,
+        -700
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.email }}",
+              "value2": "={{ $('Webhook - SuiteCRM').all()[0].json.body.email }}"
+            }
+          ],
+          "string": [
+            {
+              "value1": "={{ $json.name }}",
+              "value2": "={{ $('Webhook - SuiteCRM').all()[0].json.body.first_name }} {{ $('Webhook - SuiteCRM').all()[0].json.body.last_name }}"
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "id": "efd77d5e-f279-419c-a9f5-4dcf3d78bd42",
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1180,
+        -660
+      ]
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "odoo_list_mkt",
+          "mode": "list",
+          "cachedResultName": "odoo_list_mkt"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "id_odoo",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "column": "nome",
+              "value": "={{ $('Webhook - SuiteCRM').all()[0].json.body.first_name }} {{ $('Webhook - SuiteCRM').all()[0].json.body.last_name }}"
+            },
+            {
+              "column": "email",
+              "value": "={{ $('Webhook - SuiteCRM').all()[0].json.body.email }} "
+            },
+            {
+              "column": "operacao",
+              "value": "={{ $('Webhook - SuiteCRM').all()[0].json.headers.operation }} "
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3a703b47-6210-4752-a7df-21cbd5ec6ca1",
+      "name": "MySQL",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        -840
+      ],
+      "credentials": {
+        "mySql": {
+          "id": "hQMbzpToTERGClr2",
+          "name": "MySQL jr_onfly"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "response_mail",
+          "mode": "list",
+          "cachedResultName": "response_mail"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "accepted",
+              "value": "={{ $json.accepted[0] }}"
+            },
+            {
+              "column": "rejected",
+              "value": "="
+            },
+            {
+              "column": "envelopeTime",
+              "value": "={{ $json.envelopeTime }}"
+            },
+            {
+              "column": "messageTime",
+              "value": "={{ $json.messageTime }}"
+            },
+            {
+              "column": "de",
+              "value": "={{ $json.envelope.from }}"
+            },
+            {
+              "column": "para",
+              "value": "={{ $json.envelope.to }}"
+            },
+            {
+              "column": "messageID",
+              "value": "={{ $json.messageId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "41d42255-15ef-4145-8882-34cda414659f",
+      "name": "Response Mail",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.2,
+      "position": [
+        1740,
+        -440
+      ],
+      "credentials": {
+        "mySql": {
+          "id": "hQMbzpToTERGClr2",
+          "name": "MySQL jr_onfly"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "contact_odoo",
+          "mode": "list",
+          "cachedResultName": "contact_odoo"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "id_odoo",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "column": "name",
+              "value": "={{ $('Webhook - SuiteCRM').all()[0].json.body.first_name }} {{ $('Webhook - SuiteCRM').all()[0].json.body.last_name }}"
+            },
+            {
+              "column": "mail",
+              "value": "={{ $('Webhook - SuiteCRM').all()[0].json.body.email }} "
+            },
+            {
+              "column": "office",
+              "value": "={{ $('Webhook - SuiteCRM').all()[0].json.body.department }} "
+            },
+            {
+              "column": "cell_phone",
+              "value": "={{ $('Webhook - SuiteCRM').all()[0].json.body.phone_mobile }} "
+            },
+            {
+              "column": "cpf",
+              "value": "={{ $('Webhook - SuiteCRM').all()[0].json.body.id }} "
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "77b924f0-1aa1-425b-8106-64d7b9024e5d",
+      "name": "Contact Insert",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.2,
+      "position": [
+        1740,
+        -140
+      ],
+      "credentials": {
+        "mySql": {
+          "id": "hQMbzpToTERGClr2",
+          "name": "MySQL jr_onfly"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "custom",
+        "customResource": "mailing.contact",
+        "operation": "update",
+        "customResourceId": "={{ $json.id }}",
+        "fieldsToCreateOrUpdate": {
+          "fields": [
+            {
+              "fieldName": "email",
+              "fieldValue": "={{ $('Webhook - SuiteCRM').all()[0].json.body.email }}"
+            },
+            {
+              "fieldName": "name",
+              "fieldValue": "={{ $('Webhook - SuiteCRM').all()[0].json.body.first_name }} {{ $('Webhook - SuiteCRM').all()[0].json.body.last_name }}"
+            }
+          ]
+        }
+      },
+      "id": "19779765-5a9b-4aa6-b436-88a9f440f6b3",
+      "name": "Update Contact in M Mkt",
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        -780
+      ],
+      "credentials": {
+        "odooApi": {
+          "id": "MtSiw1OXGswAjbyi",
+          "name": "Key_user_automation"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "IF2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF2": {
+      "main": [
+        [
+          {
+            "node": "Update Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - SuiteCRM": {
+      "main": [
+        [
+          {
+            "node": "Action Test",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Validation Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Contact": {
+      "main": [
+        [
+          {
+            "node": "Send Email Update",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Contact Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Contact": {
+      "main": [
+        [
+          {
+            "node": "Send Email MKT",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Email Presentation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Contact Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Action Test": {
+      "main": [
+        [
+          {
+            "node": "Create Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validation": {
+      "main": [
+        [
+          {
+            "node": "Get Info Table Contatc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validation Mail": {
+      "main": [
+        [
+          {
+            "node": "Create Contact in M Mkt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Contact in M Mkt1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Info Table Contatc": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Contact in M Mkt1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "Update Contact in M Mkt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Contact in M Mkt": {
+      "main": [
+        [
+          {
+            "node": "MySQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email MKT": {
+      "main": [
+        [
+          {
+            "node": "Response Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email Presentation": {
+      "main": [
+        [
+          {
+            "node": "Response Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email Update": {
+      "main": [
+        [
+          {
+            "node": "Response Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Contact in M Mkt": {
+      "main": [
+        [
+          {
+            "node": "MySQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0104714e-c75f-4653-a31f-9a394155e59d",
+  "id": "PsKvQGs9Aj0CxCNR",
+  "meta": {
+    "instanceId": "9c9653e12a6c79eec3e4f484a9260042ba51624fa415ef5be98b23569d8247b1"
+  },
+  "tags": []
+}
